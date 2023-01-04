@@ -1,9 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { TodosPage, TodoPage } from "./App";
+import { createBrowserRouter, RouterProvider, Link } from "react-router-dom";
+import { TodosPage, TodoPage, LoginPage } from "./App";
+import ProtectedRoute from "./components/protected";
 import "./index.css";
 
+//Our list of todos
 let todos = [
   {
     id: 1,
@@ -18,24 +20,56 @@ let todos = [
     name: "Change oil for car",
   },
 ];
+
+//Creates our Single Page App router
 const router = createBrowserRouter([
   {
+    //Everytime we enter the index route, it will show the component below
+    path: "/", //The index route
+    element: (
+      <div className="auth-choice">
+        {/* Link component that allows us to go between pages */}
+        <Link to="/login">Login</Link>
+      </div>
+    ),
+  },
+  {
+    //Everytime we enter the login route, it will show the component below
+    //The component below is a page that we are importing
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    //Our actual todos route. This page will act as a layout and show all the todos available
+    //We are also creating a protected route component so only authed users can access the todos
     path: "/todos",
-    element: <TodosPage />,
+    element: (
+      <ProtectedRoute>
+        <TodosPage />
+      </ProtectedRoute>
+    ),
+    //Does the initial load of our todos to the todos page
     loader: () => todos,
+    //Action is for when we submit a new todo. The new todo gets added to our current array of todos
     action: ({ request }) => {
       let data = request.formData();
       todos.push(data);
       return todos;
     },
-  },
-  {
-    path: "/todos/:todoId",
-    element: <TodoPage />,
-    loader: ({ params }) => {
-      console.log(params);
-      return todos.find((todo) => todo.id === parseInt(params.todoId));
-    },
+    //Children are the subroutes of the todos page. It includes a parameter so we can see individual todos
+    children: [
+      {
+        path: ":todoId",
+        element: <TodoPage />,
+        //Initial load of a single todo. In this case we are finding a todo based on the param that is being used in the url
+        //Example: http://localhost:5173/todos/2 loads the second todo in our todo list
+        //Example: http://localhost:5173/todos/10 would load the 10th todo in our todo list (if it existed)
+        loader: ({ params }) => {
+          console.log(params); //Prints out the param from the URL
+          return todos.find((todo) => todo.id === parseInt(params.todoId));
+        },
+      },
+    ],
   },
 ]);
 
