@@ -59,6 +59,11 @@ const router = createBrowserRouter([
     //Children are the subroutes of the todos page. It includes a parameter so we can see individual todos
     children: [
       {
+        //http://localhost:5173/todos/new
+        path: "new",
+        element: <div>This is a page for a new todo to be made</div>,
+      },
+      {
         path: ":todoId",
         element: <TodoPage />,
         //Initial load of a single todo. In this case we are finding a todo based on the param that is being used in the url
